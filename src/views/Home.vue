@@ -20,8 +20,6 @@
         <v-icon>mdi-heart</v-icon>
       </v-btn>
 
-    
-
       <v-menu left bottom>
         <template v-slot:activator="{ on }">
           <v-btn icon v-on="on">
@@ -71,6 +69,14 @@
   </div>
 </template>
 <script>
+import path from "path";
+import { remote } from "electron";
+import Datastore from "nedb";
+var db = new Datastore({
+  filename: path.join(remote.app.getPath("userData"), "/bookmark.db"),
+  autoload: true
+});
+
 import jsonp from "jsonp";
 export default {
   data() {
