@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-app-bar app clipped-left color="amber">
+    <v-app-bar app clipped-left color="light-blue" dark>
       <!-- <v-app-bar-nav-icon></v-app-bar-nav-icon> -->
       <v-toolbar-title>学霸词典</v-toolbar-title>
       <v-spacer></v-spacer>
@@ -16,11 +16,11 @@
 
       <v-spacer></v-spacer>
 
-      <v-btn icon>
+      <v-btn to="/bookmark" icon>
         <v-icon>mdi-heart</v-icon>
       </v-btn>
 
-      <v-menu left bottom>
+      <!-- <v-menu left bottom>
         <template v-slot:activator="{ on }">
           <v-btn icon v-on="on">
             <v-icon>mdi-dots-vertical</v-icon>
@@ -32,7 +32,7 @@
             <v-list-item-title>Option {{ n }}</v-list-item-title>
           </v-list-item>
         </v-list>
-      </v-menu>
+      </v-menu> -->
     </v-app-bar>
 
     <v-content>
@@ -61,11 +61,12 @@
           </v-list-item>
 
           <v-card-actions>
-            <v-btn text color="deep-purple accent-4">收藏</v-btn>
+            <v-btn text color="deep-purple accent-4" @click="add">收藏</v-btn>
           </v-card-actions>
         </v-card>
       </v-container>
     </v-content>
+    <v-snackbar v-model="snackbar">{{snackbarText}}</v-snackbar>
   </div>
 </template>
 <script>
@@ -82,13 +83,22 @@ export default {
   data() {
     return {
       text: "前进",
-      result: ""
+      result: "",
+      snackbarText: "",
+      snackbar: false
     };
   },
   mounted() {
     //this.axios.defaults.headers.common["Access-Control-Allow-Origin"] = "*";
   },
   methods: {
+    add() {
+      db.insert(this.result, (err, newDoc) => {
+        this.snackbarText = "收藏成功！";
+        this.snackbar = true;
+       
+      });
+    },
     search() {
       jsonp(
         "https://api.jisuapi.com/cidian/word?appkey=06e7c8fc2cc5972e&word=" +
