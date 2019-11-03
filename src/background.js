@@ -34,7 +34,7 @@ function createWindow () {
     win = null
   })
 
-  win.setMenuBarVisibility(false);
+  //win.setMenuBarVisibility(false);
 }
 
 // Quit when all windows are closed.
