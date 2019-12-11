@@ -1,127 +1,146 @@
+// https://github.com/balena-io-modules/drivelist
+// https://github.com/jduncanator/node-diskusage
+//https://github.com/SunilWang/node-os-utils#readme
+//https://github.com/jub3i/node-cpu-stat
+//https://github.com/sebhildebrandt/systeminformation
 <template>
   <div>
-    <v-app-bar app clipped-left color="light-blue" dark>
-      <!-- <v-app-bar-nav-icon></v-app-bar-nav-icon> -->
-      <v-toolbar-title>学霸词典</v-toolbar-title>
-      <v-spacer></v-spacer>
-      <v-text-field
-        solo-inverted
-        flat
-        hide-details
-        label="搜索"
-        v-model="text"
-        prepend-inner-icon="mdi-magnify"
-        @keyup.enter.native="search"
-      ></v-text-field>
+    <v-expansion-panels :multiple="true">
+      <v-expansion-panel>
+        <v-expansion-panel-header>电脑信息</v-expansion-panel-header>
+        <v-expansion-panel-content>
+          <h2>电脑品牌：{{systemData.manufacturer}}</h2>
+          <h2>电脑型号：{{systemData.version}}</h2>
+          <h2>uuid：{{systemData.uuid}}</h2>
+          <h2>主板品牌：{{baseboardData.manufacturer}}</h2>
+        </v-expansion-panel-content>
+      </v-expansion-panel>
+      <v-expansion-panel>
+        <v-expansion-panel-header>操作系统信息</v-expansion-panel-header>
+        <v-expansion-panel-content>
+          <h2>操作系统：{{type=="Windows_NT"?"Windows":type}}</h2>
+          <h2>操作系统主机名：{{hostname}}</h2>
+          <h2>操作系统标识：{{platform}}</h2>
+          <h2>操作系统架构：{{arch}}</h2>
+          <h2>用户主目录路径：{{homedir}}</h2>
+          <h2>操作系统临时目录：{{tmpdir}}</h2>
+          <h2>平均负载：{{loadavg}}</h2>
+        </v-expansion-panel-content>
+      </v-expansion-panel>
 
-      <v-spacer></v-spacer>
+      <v-expansion-panel>
+        <v-expansion-panel-header>CPU信息</v-expansion-panel-header>
+        <v-expansion-panel-content>
+          <h2>CPU字节序：{{endianness}}</h2>
+          <h2>操作系统发行版本：{{release}}</h2>
+          <h2>CPU核心数：{{cpus.length/2}}/CPU线程数：{{cpus.length}}</h2>
+          <v-list two-line subheader>
+            <v-list-item v-for="(item,index) in cpus" :key="index" @click>
+              <v-list-item-content>
+                <v-list-item-title>{{item.model}}</v-list-item-title>
+                <v-list-item-subtitle>{{item.speed}}</v-list-item-subtitle>
+              </v-list-item-content>
+            </v-list-item>
+          </v-list>
+        </v-expansion-panel-content>
+      </v-expansion-panel>
+    </v-expansion-panels>
 
-      <v-btn to="/bookmark" icon>
-        <v-icon>mdi-heart</v-icon>
-      </v-btn>
+    <h2>
+      内存总量：总量{{(totalmem/1024/1024/1024).toFixed(2)}}G/空闲{{(freemem/1024/1024/1024).toFixed(2)}}G/已使用{{((totalmem-freemem)/1024/1024/1024).toFixed(2)}}G
+      <span></span>
+    </h2>
 
-      <!-- <v-menu left bottom>
-        <template v-slot:activator="{ on }">
-          <v-btn icon v-on="on">
-            <v-icon>mdi-dots-vertical</v-icon>
-          </v-btn>
-        </template>
+    <v-progress-linear
+      :value="(totalmem-freemem)/totalmem*(100/100)*100"
+      height="25"
+      striped
+      color="deep-orange"
+    >
+      <template v-slot="{ value }">
+        <strong>{{ Math.ceil(value) }}%</strong>
+      </template>
+    </v-progress-linear>
 
-        <v-list>
-          <v-list-item v-for="n in 5" :key="n" @click="() => {}">
-            <v-list-item-title>Option {{ n }}</v-list-item-title>
-          </v-list-item>
-        </v-list>
-      </v-menu> -->
-    </v-app-bar>
-
-    <v-content>
-      <v-container fluid>
-        <v-card class="mx-auto">
-          <v-list-item>
-            <v-list-item-content>
-              <v-list-item-title class="headline">{{text}}</v-list-item-title>
-              <v-list-item-subtitle>拼音：{{result.pinyin}}</v-list-item-subtitle>
-              <v-list-item-subtitle>英语：{{result.english}}</v-list-item-subtitle>
-              <v-list-item-subtitle>近义词：{{result.jin==""?"无":result.jin}}</v-list-item-subtitle>
-              <v-list-item-subtitle>反义词：{{result.fan==""?"无":result.fan}}</v-list-item-subtitle>
-            </v-list-item-content>
-          </v-list-item>
-          <v-list-item>
-            <v-list-item-content>
-              <v-list-item-title class="headline">解释</v-list-item-title>
-              <v-list-item-subtitle v-html="result.content"></v-list-item-subtitle>
-            </v-list-item-content>
-          </v-list-item>
-          <v-list-item>
-            <v-list-item-content>
-              <v-list-item-title class="headline">举例</v-list-item-title>
-              <v-list-item-subtitle v-html="result.example"></v-list-item-subtitle>
-            </v-list-item-content>
-          </v-list-item>
-
-          <v-card-actions>
-            <v-btn text color="deep-purple accent-4" @click="add">收藏</v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-container>
-    </v-content>
-    <v-snackbar v-model="snackbar">{{snackbarText}}</v-snackbar>
+    <h2>系统已运行时间：{{Math.round(uptime/60)}}分钟</h2>
   </div>
 </template>
-<script>
-import path from "path";
-import { remote } from "electron";
-import Datastore from "nedb";
-var db = new Datastore({
-  filename: path.join(remote.app.getPath("userData"), "/bookmark.db"),
-  autoload: true
-});
 
-import jsonp from "jsonp";
+<script>
+const os = require("os");
+import si from "systeminformation";
+// const hostname = os.hostname();
+// const homedir = os.homedir();
+// const loadavg=os.loadavg();
+const loadavg = os.loadavg();
+const cpus = os.cpus();
+
+import {
+  hostname,
+  homedir,
+  arch,
+  platform,
+  tmpdir,
+  totalmem,
+  type,
+  uptime,
+  endianness,
+  freemem,
+  release
+} from "os";
+import { async } from "q";
 export default {
   data() {
     return {
-      text: "前进",
-      result: "",
-      snackbarText: "",
-      snackbar: false
+      hostname,
+      homedir,
+      loadavg,
+      arch,
+      cpus,
+      platform,
+      tmpdir,
+      totalmem,
+      type,
+      uptime,
+      endianness,
+      release,
+      freemem,
+      systemData: {},
+      baseboardData: {},
+      cpuData: {}
     };
   },
-  mounted() {
-    //this.axios.defaults.headers.common["Access-Control-Allow-Origin"] = "*";
-  },
-  methods: {
-    add() {
-      db.insert(this.result, (err, newDoc) => {
-        this.snackbarText = "收藏成功！";
-        this.snackbar = true;
-       
-      });
-    },
-    search() {
-      jsonp(
-        "https://api.jisuapi.com/cidian/word?appkey=06e7c8fc2cc5972e&word=" +
-          this.text,
-        null,
-        (err, data) => {
-          if (err) {
-            console.error(err.message);
-          } else {
-            console.log(data.result);
-            this.result = data.result;
-          }
-        }
-      );
-    },
-    query() {
-      // this.axios
-      //   .post(
-      //     "https://api.jisuapi.com/cidian/word?appkey=06e7c8fc2cc5972e&word=%E4%B8%96%E7%95%8C")
-      //   .then(response => {
-      //     console.info(response.data);
-      //   });
-    }
+  methods: {},
+  async mounted() {
+    this.systemData = await si.system();
+    this.baseboardData = await si.baseboard();
+    this.cpuData = await si.cpu();
+    console.log(this.cpuData);
   }
 };
+
+async function systemData() {
+  try {
+    const data = await si.system();
+    console.log(data);
+  } catch (e) {}
+}
+
+// async function cpuData() {
+//   try {
+//     const data = await si.cpu();
+//     console.log("CPU Information:");
+//     console.log("- manufucturer: " + data.manufacturer);
+//     console.log("- brand: " + data.brand);
+//     console.log("- speed: " + data.speed);
+//     console.log("- cores: " + data.cores);
+//     console.log("- physical cores: " + data.physicalCores);
+//     console.log("...");
+//   } catch (e) {
+//     console.log(e);
+//   }
+// }
 </script>
+
+<style>
+</style>
