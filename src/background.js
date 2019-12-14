@@ -16,7 +16,7 @@ protocol.registerSchemesAsPrivileged([{scheme: 'app', privileges: { secure: true
 
 function createWindow () {
   // Create the browser window.
-  win = new BrowserWindow({ width: 800, height: 600, webPreferences: {
+  win = new BrowserWindow({ width: 800, height: 600,frame:false, webPreferences: {
     nodeIntegration: true
   } })
 
@@ -33,8 +33,6 @@ function createWindow () {
   win.on('closed', () => {
     win = null
   })
-
-  //win.setMenuBarVisibility(false);
 }
 
 // Quit when all windows are closed.

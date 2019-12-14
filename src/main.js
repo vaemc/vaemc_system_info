@@ -4,13 +4,16 @@ import router from './router'
 import store from './store'
 import Vuetify from 'vuetify'
 import 'vuetify/dist/vuetify.min.css'
-import '@mdi/font/css/materialdesignicons.css' 
-import axios from 'axios'
-import VueAxios from 'vue-axios'
-Vue.use(VueAxios,axios)
+import '@mdi/font/css/materialdesignicons.css'
+import zhHans from 'vuetify/es5/locale/zh-Hans'
 Vue.use(Vuetify)
 Vue.config.productionTip = false
-const opts = {}
+const opts = {
+  lang: {
+    locales: { zhHans,},
+    current: 'zhHans',
+  },
+}
 new Vue({
   router,
   store,
