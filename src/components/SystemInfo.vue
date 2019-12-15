@@ -83,14 +83,12 @@
         <strong>{{ Math.ceil(value) }}%</strong>
       </template>
     </v-progress-linear>
-    <h2>
-      CPU总使用率：{{Math.round(currentLoadData.currentload)}}%
-    </h2>
+    <h2>CPU总使用率：{{Math.round(currentLoadData.currentload)}}%</h2>
 
-    <div   v-for="(item,index) in currentLoadData.cpus" :key="index"  style="margin-bottom:1px;">
+    <div v-for="(item,index) in currentLoadData.cpus" :key="index" style="margin-bottom:1px;">
       <v-progress-linear :value="item.load" height="25" striped color="light-blue">
         <template v-slot="{ value }">
-          <strong>{{ Math.round(value) }}%</strong>
+          <strong>CPU#{{index}}---{{ Math.round(value) }}%</strong>
         </template>
       </v-progress-linear>
     </div>
@@ -114,7 +112,6 @@ import {
   arch,
   platform,
   tmpdir,
-  totalmem,
   type,
   uptime,
   endianness,
@@ -146,7 +143,7 @@ export default {
       cpus,
       platform,
       tmpdir,
-      totalmem,
+      totalmem: 0,
       type,
       uptime,
       endianness,
@@ -161,10 +158,15 @@ export default {
       processesData: { list: [] },
       osInfoData: {},
       diskLayoutData: [{ size: 0 }],
-      currentLoadData:{cpus:[]}
+      currentLoadData: { cpus: [] }
     };
   },
-
+  methods: {
+    async Refresh() {
+      this.totalmem = os.totalmem();
+      this.currentLoadData = await si.currentLoad();
+    }
+  },
   async mounted() {
     this.systemData = await si.system();
     this.baseboardData = await si.baseboard();
@@ -174,11 +176,11 @@ export default {
 
     this.usersData = await si.users();
     this.currentLoadData = await si.currentLoad();
-
+    this.totalmem = os.totalmem();
     this.processesData = await si.processes();
     this.osInfoData = await si.osInfo();
     this.diskLayoutData = await si.diskLayout();
-
+    this.timer = setInterval(this.Refresh, 1000);
     console.info(this.currentLoadData);
   }
 };
