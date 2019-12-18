@@ -12,7 +12,7 @@
           <h2>用户名：{{usersData[0].user}}</h2>
           <h2>电脑品牌：{{systemData.manufacturer}}</h2>
           <h2>电脑型号：{{systemData.version}}</h2>
-          <h2>uuid：{{systemData.uuid}}</h2>
+          <!-- <h2>uuid：{{systemData.uuid}}</h2> -->
           <h2>主板品牌：{{baseboardData.manufacturer}}</h2>
         </v-expansion-panel-content>
       </v-expansion-panel>
@@ -21,7 +21,7 @@
         <v-expansion-panel-content>
           <h2>操作系统：{{type=="Windows_NT"?"Windows":type}}</h2>
           <h2>操作系统主机名：{{hostname}}</h2>
-          <h2>发行版：{{osInfoData.distro}}</h2>
+          <h2>发行版：{{osInfoData.distro}}  {{osInfoData.release}}</h2>
           <h2>操作系统架构：{{arch}}</h2>
           <h2>用户主目录路径：{{homedir}}</h2>
           <h2>操作系统临时目录：{{tmpdir}}</h2>
@@ -41,7 +41,13 @@
           <h2>进程总数：{{processesData.all}}</h2>
           <h2>正在运行的进程数：{{processesData.running}}</h2>
           <h2>睡眠中的进程数：{{processesData.sleeping}}</h2>
-          <v-data-table :headers="processesHeaders" :items="processesData.list" :items-per-page="5"></v-data-table>
+          <v-data-table :headers="processesHeaders" :items="processesData.list" :items-per-page="5">
+
+ <template v-slot:item.pcpu="{ item }">
+      <p>{{Math.round(item.pcpu*10)}}%</p>
+    </template>
+
+          </v-data-table>
         </v-expansion-panel-content>
       </v-expansion-panel>
       <v-expansion-panel>
@@ -49,7 +55,7 @@
         <v-expansion-panel-content>
           <h2>CPU字节序：{{endianness}}</h2>
 
-          <h2>CPU核心数：{{cpus.length/2}}/CPU线程数：{{cpus.length}}</h2>
+          <!-- <h2>CPU核心数：{{cpuData.family}}/CPU线程数：{{cpuData.cores}}</h2> -->
           <v-list two-line subheader>
             <v-list-item v-for="(item,index) in cpus" :key="index" @click>
               <v-list-item-content>
@@ -80,7 +86,7 @@
       color="deep-orange"
     >
       <template v-slot="{ value }">
-        <strong>{{ Math.ceil(value) }}%</strong>
+        <strong>{{ Math.round(value) }}%</strong>
       </template>
     </v-progress-linear>
     <h2>CPU总使用率：{{Math.round(currentLoadData.currentload)}}%</h2>
