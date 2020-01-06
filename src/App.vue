@@ -22,7 +22,7 @@
         <SystemInfo/>
       </v-container>
     </v-content>
-    <v-footer app>1700130248 彭福国 Linux作业</v-footer>
+    <v-footer app>Linux作业</v-footer>
   </v-app>
 </template>
 <script>
