@@ -1,6 +1,6 @@
 # vaemc_system_info
 
-![avatar](https://vaemc-linxu.oss-cn-shenzhen.aliyuncs.com/linux/img1.jpg)
+![img](https://vaemc-linxu.oss-cn-shenzhen.aliyuncs.com/linux/img1.jpg)
 
 
 Project setup
